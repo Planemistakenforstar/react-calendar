@@ -1,40 +1,25 @@
 import { Calendar } from 'react-big-calendar'
-import { NavBar, CalendarModal, CalendarEventBox } from "../";
+import { NavBar, CalendarModal, CalendarEventBox, FabAddNew, FabDelete } from "../";
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import {addHours} from 'date-fns';
 import { localizer, getMessagesES } from "../../helpers";
-import { useState } from "react";
-import { useUiStore, useCalendarStore } from '../../hooks';
-
-
-const events = [
-  {
-  title: 'Cumpleaños del jefe',
-  notes: 'Hay que comprar el pastel',
-  start: new Date(),
-  end: addHours( new Date(), 2),
-  bgColor: '#fafafa',
-  user:{
-    _id: '123',
-    name: 'Orestis'
-  }
-}
-]
-
+import { useEffect, useState } from "react";
+import { useUiStore, useCalendarStore, useAuthStore } from '../../hooks';
 
 export const CalendarPage = () => {
-
+  const { user } = useAuthStore();
   const { openDateModal } = useUiStore();
-  const { events, setActiveEvent } = useCalendarStore();
+  const { events, setActiveEvent, startLoadingEvents } = useCalendarStore();
   const [lastView, setLastView] = useState(localStorage.getItem('lastView') || 'week');
 
   const eventStyleGetter = (event, start, end, isSelected) => {
+    const isMyEvent = (user.uid === event.user._id) || (user.uid === event.user.uid);
+
     const style = {
-      backgroundColor: '#347CF7',
+      backgroundColor: isMyEvent ? '#347CF7' : '#465660',
       borderRadius: '0px',
       opacity: 0.8,
       color: 'white'
-    }
+    } 
     return {style}
   }
 
@@ -53,6 +38,9 @@ export const CalendarPage = () => {
       setLastView(event);
   }
 
+  useEffect(() => {
+     startLoadingEvents();
+  }, [])
   return (
     <>
       <NavBar></NavBar>
@@ -73,6 +61,9 @@ export const CalendarPage = () => {
       />
 
       <CalendarModal />
+
+      <FabAddNew />
+      <FabDelete />
     </>
   )
 }

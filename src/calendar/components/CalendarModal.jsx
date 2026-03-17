@@ -26,11 +26,11 @@ Modal.setAppElement('#root');
 export const CalendarModal = () => {
   const { isDateModalOpen, closeDateModal } = useUiStore();
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const {activeEvent} = useCalendarStore();
+  const {activeEvent, startSavingEvent} = useCalendarStore();
 
   const [formValues, setFormValues] = useState({
-    title: 'Orestis',
-    notes: 'Synefakoulis',
+    title: '',
+    notes: '',
     start: new Date(),
     end: addHours( new Date(), 2)
   })
@@ -69,32 +69,27 @@ export const CalendarModal = () => {
   }
 
   const onCloseModal = ()=>{
-    console.log('cerrando modal!');
         closeDateModal();
   }
 
-  const onSubmit = (event) =>{
+  const onSubmit = async(event) =>{
     event.preventDefault();
     setFormSubmitted(true);
 
     const diff = differenceInSeconds(formValues.end, formValues.start );
-    console.log({diff});
 
     if( isNaN(diff) || diff <= 0){
       Swal.fire(' Fechas incorrectas', 'Revisar las fechas ingresadas','error');
-      console.log('error en fechas');
       return;
     }
 
     if( formValues.title.length <= 0) {
       return;
     }
-    console.log(formValues);
 
-    //TODO :
-    // CERRAR MODAL
-    //RESTABLECER FORMULARIO
-    //REMOVER ERRORES EN PANTALLA
+    await startSavingEvent(formValues);
+    closeDateModal();
+    setFormSubmitted(false);
   }
 
   return (
